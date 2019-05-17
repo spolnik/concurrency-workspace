@@ -2,7 +2,6 @@ package concurrency.workspace.servers;
 
 import org.apache.commons.cli.*;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -11,9 +10,7 @@ import java.util.function.Consumer;
 
 import static java.util.Optional.ofNullable;
 
-public class TcpServer implements Closeable {
-
-    private volatile boolean isRunning = false;
+public class TcpServer {
 
     private static final Consumer<Socket> PRINTING_HANDLER = new PrintingHandler(new TransmogrifyHandler());
 
@@ -42,7 +39,6 @@ public class TcpServer implements Closeable {
     }
 
     void run(String command, int port) throws IOException {
-        isRunning = true;
         try (var serverSocket = new ServerSocket(port)) {
             System.out.println("Listening on localhost:" + port);
             serverLoop(command, serverSocket);
@@ -50,7 +46,7 @@ public class TcpServer implements Closeable {
     }
 
     private void serverLoop(String command, ServerSocket serverSocket) throws IOException {
-        while (isRunning) {
+        while (true) {
             final var requestHandler = ofNullable(HANDLERS.get(command));
             if (requestHandler.isPresent()) {
                 final var socket = serverSocket.accept();
@@ -70,10 +66,5 @@ public class TcpServer implements Closeable {
         portOpt.setRequired(false);
         options.addOption(portOpt);
         return options;
-    }
-
-    @Override
-    public void close() {
-        isRunning = false;
     }
 }
