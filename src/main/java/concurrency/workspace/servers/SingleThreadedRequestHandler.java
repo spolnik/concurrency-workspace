@@ -1,26 +1,20 @@
 package concurrency.workspace.servers;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.Socket;
+import java.util.function.Consumer;
 
-class SingleThreadedRequestHandler implements RequestHandler, TextUtils, SocketUtils {
+class SingleThreadedRequestHandler implements Consumer<Socket>, SocketUtils {
+
+    private final Consumer<Socket> baseConsumer;
+
+    SingleThreadedRequestHandler(Consumer<Socket> baseConsumer) {
+        this.baseConsumer = baseConsumer;
+    }
 
     @Override
-    public void handle(Socket socket) {
-        logSocketLifecycle(() -> {
-            try (
-                socket;
-                var in = socket.getInputStream();
-                var out = socket.getOutputStream()
-            ) {
-                int data;
-                while ((data = in.read()) != -1) {
-                    out.write(transmogrify(data));
-                }
-            } catch (IOException ex) {
-                throw new UncheckedIOException(ex);
-            }
-        }).accept(socket);
+    public void accept(Socket socket) {
+        logSocketLifecycle(
+            () -> baseConsumer.accept(socket)
+        ).accept(socket);
     }
 }

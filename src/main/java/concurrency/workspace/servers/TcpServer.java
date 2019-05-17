@@ -4,15 +4,17 @@ import org.apache.commons.cli.*;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import static java.util.Optional.ofNullable;
 
 public class TcpServer {
 
-    private static final Map<String, RequestHandler> HANDLERS = Map.of(
-        "single", new SingleThreadedRequestHandler(),
-        "multi", new MultiThreadedRequestHandler()
+    private static final Map<String, Consumer<Socket>> HANDLERS = Map.of(
+        "single", new SingleThreadedRequestHandler(new TransmogrifyHandler()),
+        "multi", new MultiThreadedRequestHandler(new TransmogrifyHandler())
     );
 
     public static void main(String[] args) throws IOException {
@@ -46,7 +48,7 @@ public class TcpServer {
             final var requestHandler = ofNullable(HANDLERS.get(command));
             if (requestHandler.isPresent()) {
                 final var socket = serverSocket.accept();
-                requestHandler.get().handle(socket);
+                requestHandler.get().accept(socket);
             }
         }
     }
@@ -63,5 +65,4 @@ public class TcpServer {
         options.addOption(portOpt);
         return options;
     }
-
 }
