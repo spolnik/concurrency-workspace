@@ -2,6 +2,7 @@ package concurrency.workspace.servers;
 
 import org.apache.commons.cli.*;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,11 +11,15 @@ import java.util.function.Consumer;
 
 import static java.util.Optional.ofNullable;
 
-public class TcpServer {
+public class TcpServer implements Closeable {
+
+    private volatile boolean isRunning = false;
+
+    private static final Consumer<Socket> PRINTING_HANDLER = new PrintingHandler(new TransmogrifyHandler());
 
     private static final Map<String, Consumer<Socket>> HANDLERS = Map.of(
-        "single", new SingleThreadedRequestHandler(new TransmogrifyHandler()),
-        "multi", new MultiThreadedRequestHandler(new TransmogrifyHandler())
+        "single", PRINTING_HANDLER,
+        "multi", new MultiThreadedRequestHandler(PRINTING_HANDLER)
     );
 
     public static void main(String[] args) throws IOException {
@@ -28,7 +33,7 @@ public class TcpServer {
             var command = cmd.getOptionValue("command");
             var port = Integer.parseInt(cmd.getOptionValue("port", "8080"));
 
-            runServer(command, port);
+            new TcpServer().run(command, port);
         } catch (ParseException e) {
             System.out.println(e.getMessage());
             formatter.printHelp("utility-name", options);
@@ -36,15 +41,16 @@ public class TcpServer {
         }
     }
 
-    private static void runServer(String command, int port) throws IOException {
+    void run(String command, int port) throws IOException {
+        isRunning = true;
         try (var serverSocket = new ServerSocket(port)) {
             System.out.println("Listening on localhost:" + port);
             serverLoop(command, serverSocket);
         }
     }
 
-    private static void serverLoop(String command, ServerSocket serverSocket) throws IOException {
-        while (true) {
+    private void serverLoop(String command, ServerSocket serverSocket) throws IOException {
+        while (isRunning) {
             final var requestHandler = ofNullable(HANDLERS.get(command));
             if (requestHandler.isPresent()) {
                 final var socket = serverSocket.accept();
@@ -64,5 +70,10 @@ public class TcpServer {
         portOpt.setRequired(false);
         options.addOption(portOpt);
         return options;
+    }
+
+    @Override
+    public void close() {
+        isRunning = false;
     }
 }

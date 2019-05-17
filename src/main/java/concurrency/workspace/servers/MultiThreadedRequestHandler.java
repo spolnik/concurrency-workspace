@@ -3,7 +3,7 @@ package concurrency.workspace.servers;
 import java.net.Socket;
 import java.util.function.Consumer;
 
-class MultiThreadedRequestHandler implements Consumer<Socket>, SocketUtils {
+class MultiThreadedRequestHandler implements Consumer<Socket> {
 
     private final Consumer<Socket> basicHandler;
 
@@ -13,8 +13,6 @@ class MultiThreadedRequestHandler implements Consumer<Socket>, SocketUtils {
 
     @Override
     public void accept(Socket socket) {
-        new Thread(() -> logSocketLifecycle(
-            () -> basicHandler.accept(socket)
-        ).accept(socket)).start();
+        new Thread(() -> basicHandler.accept(socket)).start();
     }
 }
