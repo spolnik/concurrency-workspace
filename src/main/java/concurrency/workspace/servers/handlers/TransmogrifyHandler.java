@@ -5,6 +5,8 @@ import java.io.UncheckedIOException;
 import java.net.Socket;
 import java.util.function.Consumer;
 
+import static concurrency.workspace.servers.util.Util.transmogrify;
+
 public class TransmogrifyHandler implements Consumer<Socket> {
 
     @Override
@@ -21,9 +23,5 @@ public class TransmogrifyHandler implements Consumer<Socket> {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-    }
-
-    private int transmogrify(int data) {
-        return Character.isLetter(data) ? data ^ ' ' : data;
     }
 }

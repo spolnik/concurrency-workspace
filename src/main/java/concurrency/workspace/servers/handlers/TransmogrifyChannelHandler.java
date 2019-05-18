@@ -6,6 +6,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.function.Consumer;
 
+import static concurrency.workspace.servers.util.Util.transmogrify;
+
 public class TransmogrifyChannelHandler implements Consumer<SocketChannel> {
 
     @Override
@@ -26,16 +28,5 @@ public class TransmogrifyChannelHandler implements Consumer<SocketChannel> {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-    }
-
-    private void transmogrify(ByteBuffer buf) {
-        buf.flip();
-        for (int i = 0; i< buf.limit(); i++) {
-            buf.put(i, (byte) transmogrify(buf.get(i)));
-        }
-    }
-
-    private int transmogrify(int data) {
-        return Character.isLetter(data) ? data ^ ' ' : data;
     }
 }
