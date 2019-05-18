@@ -27,6 +27,7 @@ public class ReadHandler implements Consumer<SelectionKey> {
             if (read == -1) {
                 pendingData.remove(sc);
                 sc.close();
+                System.err.println("Disconnected from " + sc + "(in read())");
                 return;
             }
             if (read > 0) {

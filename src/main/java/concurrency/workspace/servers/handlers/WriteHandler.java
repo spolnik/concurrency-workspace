@@ -30,6 +30,7 @@ public class WriteHandler implements Consumer<SelectionKey> {
                 if (written == -1) {
                     sc.close();
                     pendingData.remove(sc);
+                    System.err.println("Disconnected from " + sc + "(in write())");
                     return;
                 }
                 if (buf.hasRemaining()) return;
