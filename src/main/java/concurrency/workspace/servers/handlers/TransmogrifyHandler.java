@@ -1,4 +1,4 @@
-package concurrency.workspace.servers;
+package concurrency.workspace.servers.handlers;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

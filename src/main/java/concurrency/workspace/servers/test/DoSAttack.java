@@ -1,4 +1,4 @@
-package concurrency.workspace.servers;
+package concurrency.workspace.servers.test;
 
 import java.io.IOException;
 import java.net.Socket;
