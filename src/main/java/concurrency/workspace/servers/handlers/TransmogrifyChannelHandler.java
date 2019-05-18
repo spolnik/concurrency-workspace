@@ -2,7 +2,6 @@ package concurrency.workspace.servers.handlers;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.function.Consumer;
@@ -24,7 +23,6 @@ public class TransmogrifyChannelHandler implements Consumer<SocketChannel> {
                     socket.write(buf);
                 }
             }
-            buf.compact();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
