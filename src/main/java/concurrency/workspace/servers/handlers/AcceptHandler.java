@@ -5,6 +5,7 @@ import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 public class AcceptHandler implements Consumer<SelectionKey> {
@@ -21,7 +22,7 @@ public class AcceptHandler implements Consumer<SelectionKey> {
         try {
             var sc = ssc.accept();
             System.err.println("Connected to " + sc);
-            pendingData.put(sc, new ArrayDeque<>());
+            pendingData.put(sc, new ConcurrentLinkedQueue<>());
             sc.configureBlocking(false);
             sc.register(selectionKey.selector(), SelectionKey.OP_READ);
         } catch (IOException e) {
